@@ -45,32 +45,6 @@ diff --git a/res/values/strings.xml b/res/values/strings.xml
 index 9a29122..99eb756 100644
 --- a/res/values/strings.xml
 +++ b/res/values/strings.xml
-@@ -1152,6 +1152,25 @@
-     <!-- Explanation of the Android Beam feature in the Android Beam settings panel. The use of "beam" here is as a verb and not considered trademarked. [CHAR LIMIT=NONE] -->
-     <string name="android_beam_explained">When this feature is turned on, you can beam app content to another NFC-capable device by holding the devices close together. For example, you can beam Browser pages, YouTube videos, People contacts, and more.\n\nJust bring the devices together (typically back to back) and then touch your screen. The app determines what gets beamed.</string>
- 
-+    <!-- Ethernet configuration dialog -->
-+    <string name="eth_config_title">Configure Ethernet device</string>
-+    <string name="eth_setting">Ethernet setting</string>
-+    <string name="eth_dev_list">Ethernet Devices:</string>
-+    <string name="eth_con_type">Connection Type</string>
-+    <string name="eth_con_type_dhcp">DHCP</string>
-+    <string name="eth_con_type_manual">Static IP</string>
-+    <string name="eth_dns">DNS address</string>
-+    <string name="eth_gw">Gateway address</string>
-+    <string name="eth_ipaddr">IP address</string>
-+    <string name="eth_quick_toggle_title">Ethernet</string>
-+    <string name="eth_quick_toggle_summary">Turn on Ethernet</string>
-+    <string name="eth_radio_ctrl_title">Ethernet configuration</string>
-+    <string name="eth_conf_perf_title">Ethernet configuration</string>
-+    <string name="eth_conf_summary">Configure Ethernet devices</string>
-+    <string name="eth_mask">Netmask</string>
-+    <string name="eth_toggle_summary_off">Turn off Ethernet</string>
-+    <string name="eth_toggle_summary_on">Turn on Ethernet</string>
-+
-     <!-- Wi-Fi Settings --> <skip />
-     <!-- Used in the 1st-level settings screen to turn on Wi-Fi -->
-     <string name="wifi_quick_toggle_title">Wi-Fi</string>
 @@ -3779,5 +3798,12 @@ found in the list of installed apps.</string>
      from their cell phone carrier. The use of the string is similar to the string
      "system_update_settings_list_item_title" in this project. [CHAR LIMIT=25] -->
