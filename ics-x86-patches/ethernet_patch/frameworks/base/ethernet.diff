@@ -1,0 +1,506 @@
+diff --git a/Android.mk b/Android.mk
+index 371c370..77ff8b5 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -196,6 +196,7 @@ LOCAL_SRC_FILES += \
+ 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
+ 	wifi/java/android/net/wifi/IWifiManager.aidl \
+ 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
++	ethernet/java/android/net/ethernet/IEthernetManager.aidl \
+ 	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl \
+ 	voip/java/android/net/sip/ISipSession.aidl \
+ 	voip/java/android/net/sip/ISipSessionListener.aidl \
+diff --git a/api/current.txt b/api/current.txt
+index ddf5baf..3e71a83 100644
+--- a/api/current.txt
++++ b/api/current.txt
+@@ -5109,6 +5109,7 @@ package android.content {
+     field public static final java.lang.String DEVICE_POLICY_SERVICE = "device_policy";
+     field public static final java.lang.String DOWNLOAD_SERVICE = "download";
+     field public static final java.lang.String DROPBOX_SERVICE = "dropbox";
++    field public static final java.lang.String ETHERNET_SERVICE = "ethernet";
+     field public static final java.lang.String INPUT_METHOD_SERVICE = "input_method";
+     field public static final java.lang.String KEYGUARD_SERVICE = "keyguard";
+     field public static final java.lang.String LAYOUT_INFLATER_SERVICE = "layout_inflater";
+@@ -11966,6 +11967,61 @@ package android.net {
+ 
+ }
+ 
++package android.net.ethernet {
++
++  public class name EthernetDevInfo implements android.os.Parcelable {
++
++    ctor public android.net.ethernet.EthernetDevInfo EthernetDevInfo ();
++    method public int describeContents();
++    method public java.lang.String getConnectMode();
++    method public java.lang.String getDnsAddr();
++    method public java.lang.String getIfName();
++    method public java.lang.String getIpAddress();
++    method public java.lang.String getNetMask();
++    method public java.lang.String getRouteAddr();
++    method public boolean setConnectMode();
++    method public void setDnsAddr();
++    method public void setIfName(java.lang.String);
++    method public void setIpAddress(java.lang.String);
++    method public void setNetMask(java.lang.String);
++    method public void setRouteAddr(java.lang.String);
++    method public void writeToParcel(android.os.Parcel, int);
++    method public static final java.lang.String ETHERNET_CONN_MODE_DHCP() = dhcp;
++    field public static final java.lang.String ETHERNET_CONN_MODE_MANUAL = manual;
++  }
++
++  public class EthernetManager {
++    ctor public android.net.ethernet.EthernetManager EthernetManager(android.net.ethernet.IEthernetMana, android.os.Handler)
++    method public java.lang.String[] getDeviceNameList();
++    method public android.net.ethernet.EthernetDevInfo getSavedConfig();
++    method public int getState();
++    method public int getTotalInterface();
++    method public boolean isConfigured();
++    method public void updateDevInfo(android.net.ethernet.EthernetDevInfo);
++    field public static final int ETHERNET_DEVICE_SCAN_RESULT_READY = 0;
++    field public static final java.lang.String ETHERNET_STATE_CHANGED_ACTION = android.net.ethernet.ETHERNET_STATE_CHANGED;
++    field public static final int ETHERNET_STATE_DISABLED = 1;
++    field public static final int ETHERNET_STATE_ENABLED = 2;
++    field public static final int ETHERNET_STATE_UNKNOWN = 0;
++    field public static final java.lang.String EXTRA_ETHERNET_STATE = ETHERNET_state;
++    field public static final java.lang.String EXTRA_NETWORK_INFO = networkInfo;
++    field public static final java.lang.String EXTRA_PREVIOUS_ETHERNET_STATE = previous_ETHERNET_state;
++    field public static final java.lang.String NETWORK_STATE_CHANGED_ACTION = android.net.ethernet.STATE_CHANGE;
++    field public static final java.lang.String TAG = EthernetManager;
++  }
++
++  public interface IEthernetManager implements android.os.IInterface {
++    method public abstract java.lang.String[] getDeviceNameList();
++    method public abstract android.net.ethernet.EthernetDevInfo getSavedConfig() throws android.os.RemoteException;
++    method public abstract int getState() throws android.os.RemoteException;
++    method public abstract int getTotalInterface() android.os.RemoteException;
++    method public abstract boolean isConfigured(i) android.os.RemoteException;
++    method public abstract void setMode(java.lang.String) throws android.os.RemoteException;
++    method public abstract void setState(int) throws android.os.RemoteException;
++    method public abstract void updateDevInfo(android.net.ethernet.EthernetDevInfo) thows android.os.RemoteException;
++  }
++}
++
+ package android.net.http {
+ 
+   public final class AndroidHttpClient implements org.apache.http.client.HttpClient {
+diff --git a/core/java/android/app/ContextImpl.java b/core/java/android/app/ContextImpl.java
+index 2bf1fb7..c31ff058 100644
+--- a/core/java/android/app/ContextImpl.java
++++ b/core/java/android/app/ContextImpl.java
+@@ -61,6 +61,8 @@ import android.net.wifi.IWifiManager;
+ import android.net.wifi.WifiManager;
+ import android.net.wifi.p2p.IWifiP2pManager;
+ import android.net.wifi.p2p.WifiP2pManager;
++import android.net.ethernet.IEthernetManager;
++import android.net.ethernet.EthernetManager;
+ import android.nfc.NfcManager;
+ import android.os.Binder;
+ import android.os.Bundle;
+@@ -448,6 +450,13 @@ class ContextImpl extends Context {
+                     return new WifiP2pManager(service);
+                 }});
+ 
++        registerService(ETHERNET_SERVICE, new ServiceFetcher() {
++                public Object createService(ContextImpl ctx) {
++                    IBinder b = ServiceManager.getService(ETHERNET_SERVICE);
++                    IEthernetManager service = IEthernetManager.Stub.asInterface(b);
++                    return new EthernetManager(service, ctx.mMainThread.getHandler());
++                }});
++
+         registerService(WINDOW_SERVICE, new ServiceFetcher() {
+                 public Object getService(ContextImpl ctx) {
+                     return WindowManagerImpl.getDefault(ctx.mPackageInfo.mCompatibilityInfo);
+diff --git a/core/java/android/app/DownloadManager.java b/core/java/android/app/DownloadManager.java
+index ad8d41f..1282cf3 100644
+--- a/core/java/android/app/DownloadManager.java
++++ b/core/java/android/app/DownloadManager.java
+@@ -341,6 +341,12 @@ public class DownloadManager {
+          */
+         public static final int NETWORK_WIFI = 1 << 1;
+ 
++        /**
++         * Bit flag for {@link #setAllowedNetworkTypes} corresponding to
++         * {@link ConnectivityManager#TYPE_ETHERNET}.
++         */
++        public static final int NETWORK_ETHERNET = 1 << 2;
++
+         private Uri mUri;
+         private Uri mDestinationUri;
+         private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
+diff --git a/core/java/android/content/Context.java b/core/java/android/content/Context.java
+index bfbd0ac..e2c85ce 100644
+--- a/core/java/android/content/Context.java
++++ b/core/java/android/content/Context.java
+@@ -1461,6 +1461,16 @@ public abstract class Context {
+      */
+     public static final String WINDOW_SERVICE = "window";
+ 
++     /**
++     * Use with {@link #getSystemService} to retrieve a {@link
++     * android.net.ethernet.EthernetManager} for handling management of
++     * Ethernet access.
++     *
++     * @see #getSystemService
++     * @see android.net.ethernet.EthernetManager
++     */
++    public static final String ETHERNET_SERVICE = "ethernet";
++
+     /**
+      * Use with {@link #getSystemService} to retrieve a
+      * {@link android.view.LayoutInflater} for inflating layout resources in this
+diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
+index 65b4e7e..950103e 100644
+--- a/core/java/android/provider/Settings.java
++++ b/core/java/android/provider/Settings.java
+@@ -3169,6 +3169,18 @@ public final class Settings {
+             "wifi_mobile_data_transition_wakelock_timeout_ms";
+ 
+         /**
++         * Ethernet related configurations
++         */
++        public static final String ETHERNET_ON      = "ethernet_on";
++        public static final String ETHERNET_MODE    = "ethernet_mode";
++        public static final String ETHERNET_IP      = "ethernet_ip";
++        public static final String ETHERNET_MASK    = "ethernet_netmask";
++        public static final String ETHERNET_DNS     = "ethernet_dns";
++        public static final String ETHERNET_ROUTE   = "ethernet_iproute";
++        public static final String ETHERNET_CONF    = "ethernet_conf";
++        public static final String ETHERNET_IFNAME  = "ethernet_ifname";
++
++        /**
+          * Whether background data usage is allowed by the user. See
+          * ConnectivityManager for more info.
+          */
+diff --git a/core/jni/Android.mk b/core/jni/Android.mk
+index 4354ccb..07e0929 100644
+--- a/core/jni/Android.mk
++++ b/core/jni/Android.mk
+@@ -74,6 +74,7 @@ LOCAL_SRC_FILES:= \
+ 	android_net_NetUtils.cpp \
+ 	android_net_TrafficStats.cpp \
+ 	android_net_wifi_Wifi.cpp \
++	android_net_ethernet.cpp \
+ 	android_nio_utils.cpp \
+ 	android_text_format_Time.cpp \
+ 	android_util_AssetManager.cpp \
+diff --git a/core/jni/AndroidRuntime.cpp b/core/jni/AndroidRuntime.cpp
+index 16e0376..1c4aaf6 100644
+--- a/core/jni/AndroidRuntime.cpp
++++ b/core/jni/AndroidRuntime.cpp
+@@ -146,6 +146,7 @@ extern int register_android_net_LocalSocketImpl(JNIEnv* env);
+ extern int register_android_net_NetworkUtils(JNIEnv* env);
+ extern int register_android_net_TrafficStats(JNIEnv* env);
+ extern int register_android_net_wifi_WifiManager(JNIEnv* env);
++extern int register_android_net_ethernet_EthernetManager(JNIEnv* env);
+ extern int register_android_text_AndroidCharacter(JNIEnv *env);
+ extern int register_android_text_AndroidBidi(JNIEnv *env);
+ extern int register_android_text_KeyCharacterMap(JNIEnv *env);
+@@ -1159,6 +1160,7 @@ static const RegJNIRec gRegJNI[] = {
+     REG_JNI(register_android_net_NetworkUtils),
+     REG_JNI(register_android_net_TrafficStats),
+     REG_JNI(register_android_net_wifi_WifiManager),
++	REG_JNI(register_android_net_ethernet_EthernetManager),
+ #ifndef __i386__
+     REG_JNI(register_android_nfc_NdefMessage),
+     REG_JNI(register_android_nfc_NdefRecord),
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java b/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java
+index 0408e63..fb39c94 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java
+@@ -31,6 +31,8 @@ import android.net.NetworkInfo;
+ import android.net.wifi.WifiConfiguration;
+ import android.net.wifi.WifiInfo;
+ import android.net.wifi.WifiManager;
++import android.net.ethernet.EthernetManager;
++import android.net.ethernet.EthernetStateTracker;
+ import android.net.wimax.WimaxManagerConstants;
+ import android.os.Binder;
+ import android.os.Handler;
+@@ -107,14 +109,24 @@ public class NetworkController extends BroadcastReceiver {
+     int mWifiActivity = WifiManager.DATA_ACTIVITY_NONE;
+ 
+     // Ethernet
+-    boolean mHasEthernet, mEthernetConnected;
+-    int mEthernetIconId = 0;
++    boolean mHasEthernet;
+ 
+     // bluetooth
+     private boolean mBluetoothTethered = false;
+     private int mBluetoothTetherIconId =
+         com.android.internal.R.drawable.stat_sys_tether_bluetooth;
+ 
++    // Ethernet
++    boolean mEthernetEnabled, mEthernetConnected;
++    int mEthernetIconId = 0; // overlay arrows for wifi direction
++    int mEthernetActivity = EthernetManager.DATA_ACTIVITY_NONE;
++    private static final int[] sEthImages = {
++        R.drawable.connect_established,
++        R.drawable.connect_no,
++        R.drawable.connect_creating
++    };
++
++
+     //wimax
+     private boolean mWimaxSupported = false;
+     private boolean mIsWimaxEnabled = false;
+@@ -217,6 +229,7 @@ public class NetworkController extends BroadcastReceiver {
+         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
++        filter.addAction(EthernetManager.ETHERNET_STATE_CHANGED_ACTION);
+         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+         filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
+         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+@@ -345,6 +358,9 @@ public class NetworkController extends BroadcastReceiver {
+         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+             updateAirplaneMode();
+             refreshViews();
++        } else if (action.equals(EthernetManager.ETHERNET_STATE_CHANGED_ACTION)) {
++            updateEth(intent);
++            refreshViews();
+         } else if (action.equals(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION) ||
+                 action.equals(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION) ||
+                 action.equals(WimaxManagerConstants.WIMAX_NETWORK_STATE_CHANGED_ACTION)) {
+@@ -793,6 +809,14 @@ public class NetworkController extends BroadcastReceiver {
+         }
+     }
+ 
++    private void updateEthernetIcons() {
++        if (mEthernetConnected) {
++            mEthernetIconId = sEthImages[0];
++        } else {
++            mEthernetIconId = sEthImages[1];
++        }
++    }
++
+     private String huntForSsid(WifiInfo info) {
+         String ssid = info.getSSID();
+         if (ssid != null) {
+@@ -808,15 +832,6 @@ public class NetworkController extends BroadcastReceiver {
+         return null;
+     }
+ 
+-    // ===== Ethernet=================================================================
+-    private void updateEthernetIcons() {
+-        if (mEthernetConnected) {
+-            mEthernetIconId = R.drawable.stat_sys_ethernet_connected;
+-        } else {
+-            mEthernetIconId = R.drawable.stat_sys_ethernet_disconnected;
+-        }
+-    }
+-
+     // ===== Wimax ===================================================================
+     private final void updateWimaxState(Intent intent) {
+         final String action = intent.getAction();
+@@ -962,6 +977,18 @@ public class NetworkController extends BroadcastReceiver {
+             label = "Ethernet Connected";
+             combinedActivityIconId = 0;
+             combinedSignalIconId = mEthernetIconId;
++            switch (mEthernetActivity) {
++                case EthernetStateTracker.EVENT_HW_CONNECTED:
++                case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_SUCCEEDED:
++                    mEthernetIconId = sEthImages[0];
++                    break;
++                case EthernetStateTracker.EVENT_HW_DISCONNECTED:
++                case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_FAILED:
++                    mEthernetIconId = sEthImages[1];
++                    return;
++                default:
++                    mEthernetIconId = sEthImages[2];
++            }
+         }
+ 
+         if (mBluetoothTethered) {
+@@ -1167,6 +1194,22 @@ public class NetworkController extends BroadcastReceiver {
+         }
+     }
+ 
++    private final void updateEth(Intent intent) {
++        final int event = intent.getIntExtra(EthernetManager.EXTRA_ETHERNET_STATE, EthernetManager.ETHERNET_STATE_UNKNOWN);
++        switch (event) {
++            case EthernetStateTracker.EVENT_HW_CONNECTED:
++            case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_SUCCEEDED:
++                mEthernetIconId = sEthImages[0];
++                break;
++            case EthernetStateTracker.EVENT_HW_DISCONNECTED:
++            case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_FAILED:
++                mEthernetIconId = sEthImages[1];
++                return;
++            default:
++                mEthernetIconId = sEthImages[2];
++        }
++    }
++
+     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+         pw.println("NetworkController state:");
+         pw.println("  - telephony ------");
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java b/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java
+index 0408e63..fb39c94 100644
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java
+@@ -31,6 +31,8 @@ import android.net.NetworkInfo;
+ import android.net.wifi.WifiConfiguration;
+ import android.net.wifi.WifiInfo;
+ import android.net.wifi.WifiManager;
++import android.net.ethernet.EthernetManager;
++import android.net.ethernet.EthernetStateTracker;
+ import android.net.wimax.WimaxManagerConstants;
+ import android.os.Binder;
+ import android.os.Handler;
+@@ -107,14 +109,24 @@ public class NetworkController extends BroadcastReceiver {
+     int mWifiActivity = WifiManager.DATA_ACTIVITY_NONE;
+ 
+     // Ethernet
+-    boolean mHasEthernet, mEthernetConnected;
+-    int mEthernetIconId = 0;
++    boolean mHasEthernet;
+ 
+     // bluetooth
+     private boolean mBluetoothTethered = false;
+     private int mBluetoothTetherIconId =
+         com.android.internal.R.drawable.stat_sys_tether_bluetooth;
+ 
++    // Ethernet
++    boolean mEthernetEnabled, mEthernetConnected;
++    int mEthernetIconId = 0; // overlay arrows for wifi direction
++    int mEthernetActivity = EthernetManager.DATA_ACTIVITY_NONE;
++    private static final int[] sEthImages = {
++        R.drawable.connect_established,
++        R.drawable.connect_no,
++        R.drawable.connect_creating
++    };
++
++
+     //wimax
+     private boolean mWimaxSupported = false;
+     private boolean mIsWimaxEnabled = false;
+@@ -217,6 +229,7 @@ public class NetworkController extends BroadcastReceiver {
+         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
++        filter.addAction(EthernetManager.ETHERNET_STATE_CHANGED_ACTION);
+         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+         filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
+         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+@@ -345,6 +358,9 @@ public class NetworkController extends BroadcastReceiver {
+         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+             updateAirplaneMode();
+             refreshViews();
++        } else if (action.equals(EthernetManager.ETHERNET_STATE_CHANGED_ACTION)) {
++            updateEth(intent);
++            refreshViews();
+         } else if (action.equals(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION) ||
+                 action.equals(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION) ||
+                 action.equals(WimaxManagerConstants.WIMAX_NETWORK_STATE_CHANGED_ACTION)) {
+@@ -793,6 +809,14 @@ public class NetworkController extends BroadcastReceiver {
+         }
+     }
+ 
++    private void updateEthernetIcons() {
++        if (mEthernetConnected) {
++            mEthernetIconId = sEthImages[0];
++        } else {
++            mEthernetIconId = sEthImages[1];
++        }
++    }
++
+     private String huntForSsid(WifiInfo info) {
+         String ssid = info.getSSID();
+         if (ssid != null) {
+@@ -808,15 +832,6 @@ public class NetworkController extends BroadcastReceiver {
+         return null;
+     }
+ 
+-    // ===== Ethernet=================================================================
+-    private void updateEthernetIcons() {
+-        if (mEthernetConnected) {
+-            mEthernetIconId = R.drawable.stat_sys_ethernet_connected;
+-        } else {
+-            mEthernetIconId = R.drawable.stat_sys_ethernet_disconnected;
+-        }
+-    }
+-
+     // ===== Wimax ===================================================================
+     private final void updateWimaxState(Intent intent) {
+         final String action = intent.getAction();
+@@ -962,6 +977,18 @@ public class NetworkController extends BroadcastReceiver {
+             label = "Ethernet Connected";
+             combinedActivityIconId = 0;
+             combinedSignalIconId = mEthernetIconId;
++            switch (mEthernetActivity) {
++                case EthernetStateTracker.EVENT_HW_CONNECTED:
++                case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_SUCCEEDED:
++                    mEthernetIconId = sEthImages[0];
++                    break;
++                case EthernetStateTracker.EVENT_HW_DISCONNECTED:
++                case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_FAILED:
++                    mEthernetIconId = sEthImages[1];
++                    return;
++                default:
++                    mEthernetIconId = sEthImages[2];
++            }
+         }
+ 
+         if (mBluetoothTethered) {
+@@ -1167,6 +1194,22 @@ public class NetworkController extends BroadcastReceiver {
+         }
+     }
+ 
++    private final void updateEth(Intent intent) {
++        final int event = intent.getIntExtra(EthernetManager.EXTRA_ETHERNET_STATE, EthernetManager.ETHERNET_STATE_UNKNOWN);
++        switch (event) {
++            case EthernetStateTracker.EVENT_HW_CONNECTED:
++            case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_SUCCEEDED:
++                mEthernetIconId = sEthImages[0];
++                break;
++            case EthernetStateTracker.EVENT_HW_DISCONNECTED:
++            case EthernetStateTracker.EVENT_INTERFACE_CONFIGURATION_FAILED:
++                mEthernetIconId = sEthImages[1];
++                return;
++            default:
++                mEthernetIconId = sEthImages[2];
++        }
++    }
++
+     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+         pw.println("NetworkController state:");
+         pw.println("  - telephony ------");
+diff --git a/services/java/com/android/server/ConnectivityService.java b/services/java/com/android/server/ConnectivityService.java
+index 6e4aca7..ab4ad0a 100644
+--- a/services/java/com/android/server/ConnectivityService.java
++++ b/services/java/com/android/server/ConnectivityService.java
+@@ -53,6 +53,7 @@ import android.net.Proxy;
+ import android.net.ProxyProperties;
+ import android.net.RouteInfo;
+ import android.net.wifi.WifiStateTracker;
++import android.net.ethernet.EthernetStateTracker;
+ import android.net.wimax.WimaxManagerConstants;
+ import android.os.Binder;
+ import android.os.FileUtils;
+@@ -413,7 +414,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
+                             n.type);
+                     continue;
+                 }
+-                if (mRadioAttributes[n.radio] == null) {
++                if ((n.type != ConnectivityManager.TYPE_ETHERNET) && (mRadioAttributes[n.radio] == null)) {
+                     loge("Error in networkAttributes - ignoring attempt to use undefined " +
+                             "radio " + n.radio + " in network type " + n.type);
+                     continue;
+@@ -505,8 +506,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
+                 }
+                 break;
+             case ConnectivityManager.TYPE_ETHERNET:
+-                mNetTrackers[netType] = EthernetDataTracker.getInstance();
+-                mNetTrackers[netType].startMonitoring(context, mHandler);
++                //mNetTrackers[netType] = EthernetDataTracker.getInstance();
++                //mNetTrackers[netType].startMonitoring(context, mHandler);
++                if (DBG) log("Starting Ethernet Service.");
++                EthernetStateTracker est = new EthernetStateTracker(context, mHandler);
++                EthernetService ethService = new EthernetService(context, est);
++                ServiceManager.addService(Context.ETHERNET_SERVICE, ethService);
++                mNetTrackers[ConnectivityManager.TYPE_ETHERNET] = est;
++                est.startMonitoring(context, mHandler);
+                 break;
+             default:
+                 loge("Trying to create a DataStateTracker for an unknown radio type " +

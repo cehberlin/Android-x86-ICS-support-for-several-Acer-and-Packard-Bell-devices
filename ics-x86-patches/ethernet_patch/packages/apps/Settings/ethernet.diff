@@ -1,0 +1,64 @@
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+index cfa92b0..564f4d0 100644
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -88,6 +88,41 @@
+             </intent-filter>
+         </activity>
+ 
++         <!-- Ethernet controls -->
++        <activity android:name=".ethernet.EthernetSettings"
++                android:label="@string/eth_radio_ctrl_title">
++            <intent-filter>
++                <action android:name="android.intent.action.MAIN" />
++                <action android:name="android.settings.ETHERNET_SETTINGS" />
++                <category android:name="android.intent.category.DEFAULT" />
++                <category android:name="android.intent.category.VOICE_LAUNCH" />
++            </intent-filter>
++        </activity>
++
++        <activity android:name=".ethernet.EthernetEnabler"
++                android:label="@string/eth_setting"
++                android:clearTaskOnLaunch="true">
++            <intent-filter>
++                <action android:name="android.intent.action.MAIN" />
++                <action android:name="android.settings.ETHERNET_SETTINGS" />
++                <category android:name="android.intent.category.DEFAULT" />
++                <category android:name="android.intent.category.VOICE_LAUNCH" />
++                <category android:name="com.android.settings.SHORTCUT" />
++            </intent-filter>
++        </activity>
++
++        <activity android:name=".ethernet.EthernetConfigure"
++                android:label="@string/eth_conf_perf_title"
++                android:clearTaskOnLaunch="true">
++            <intent-filter>
++                <action android:name="android.intent.action.MAIN" />
++                <action android:name="android.settings.ETHERNET_SETTINGS" />
++                <category android:name="android.intent.category.DEFAULT" />
++                <category android:name="android.intent.category.VOICE_LAUNCH" />
++                <category android:name="com.android.settings.SHORTCUT" />
++            </intent-filter>
++        </activity>
++
+         <!-- Wireless Controls -->
+ 
+         <activity android:name="Settings$WirelessSettingsActivity"
+diff --git a/res/xml/settings_headers.xml b/res/xml/settings_headers.xml
+index 0f4dbb3..7f77f97 100644
+--- a/res/xml/settings_headers.xml
++++ b/res/xml/settings_headers.xml
+@@ -57,6 +57,13 @@
+         android:fragment="com.android.settings.WirelessSettings"
+         android:icon="@drawable/empty_icon" />
+ 
++   <!-- Ethernet -->
++   <header
++        android:id="@+id/ethernet_settings"
++        android:title="@string/eth_radio_ctrl_title"
++        android:icon="@drawable/ic_settings_ethernet"
++        android:fragment="com.android.settings.ethernet.EthernetSettings"/>
++
+     <!-- DEVICE -->
+     <header android:title="@string/header_category_device" />
+ 

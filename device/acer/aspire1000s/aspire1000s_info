@@ -1,0 +1,100 @@
+DMIPATH=/sys/class/dmi/id
+
+#enable accelerometer for auto-rotation
+enable_accelerometer()
+{
+	modprobe i2c-i801
+	modprobe lis3lv02d
+	modprobe lis3lv02d_i2c
+	echo lis3lv02d 0x1d>/sys/devices/pci0000:00/0000:00:1f.3/i2c-0/new_device
+}
+
+#enable fan regulation for supported acer devices
+enable_acer_fan_regulation()
+{
+    modprobe acerhdf interval=5 fanon=68000 fanoff=55000 kernelmode=1
+}
+
+
+aspire1000s_info()
+{
+	board=`cat $DMIPATH/product_name`
+		
+	case "$board" in
+		*1825P*|*1425P*)
+		
+		    echo Detected 1825P or 1425P
+		    
+			EXTMOD="$EXTMOD hid-multitouch"
+
+            enable_accelerometer
+			
+			enable_acer_fan_regulation
+			
+			;;
+		*1420P*|*1820P*)
+		
+		    echo Detected 1820P or 1420P
+		    
+			EXTMOD="$EXTMOD hid-multitouch"
+
+			# Use this command, only with hid-mutitouch driver with resistive touch panel
+			echo 3 $VendorID $ProductID 0 > /sys/module/hid_multitouch/drivers/hid\:hid-multitouch/new_id
+            
+            enable_accelerometer
+            
+            enable_acer_fan_regulation
+			
+			;;
+		*1410*|*1810*)
+		
+		    echo Detected 1810 or 1410
+		    
+			enable_acer_fan_regulation
+			;;
+		*ENBFT*)
+		
+		    echo Detected Packard Bell Butterfly Touch
+
+			EXTMOD="$EXTMOD hid-multitouch"
+
+            enable_accelerometer
+            
+			enable_acer_fan_regulation
+			;;
+		*) 
+		    #ALL other Acer devices
+		    
+		    enable_acer_fan_regulation
+			;;
+	esac
+
+	return 1 # auto_detect
+}
+
+detect_hardware()
+{
+	echo Android-x86 build from www.ceh-photo.de 
+	echo
+	echo This build is released for free! You should not have payed for it!
+	echo
+	
+	board=`cat $DMIPATH/product_name`
+	echo
+	echo Running on $board
+	echo
+	
+	case "`cat $DMIPATH/uevent`" in
+		*Acer*)
+			echo Acer Laptop detected
+			aspire1000s_info
+			;;
+		*Packard*)
+			echo Packard Bell Laptop detected
+			aspire1000s_info
+			;;
+		*)
+			error Warning: Unknown Laptop detected
+			;;
+	esac
+}

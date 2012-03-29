@@ -1,0 +1,27 @@
+# system.prop for acer-1000s
+ro.sf.lcd_density=160
+# higher value saves battery
+#battery configuration
+ro.sys.fs.power_supply.ac=/ACAD
+ro.sys.fs.power_supply.bat=/BAT1
+ro.sys.fs.power_supply.ac.feature.online=/online
+ro.sys.fs.power_supply.bat.feature.status=/status
+ro.sys.fs.power_supply.bat.feature.present=/present
+ro.sys.fs.power_supply.bat.feature.capacity.now=/charge_now
+ro.sys.fs.power_supply.bat.feature.capacity.full=/charge_full
+ro.sys.fs.power_supply.bat.feature.voltage.now=/voltage_now
+ro.sys.fs.power_supply.bat.feature.voltage.full=/charge_full
+ro.sys.fs.power_supply.bat.feature.tech=/technology
+#disable red blinking frame
+persist.sys.strictmode.visual=0
+persist.sys.strictmode.disable=1
+ro.com.google.locationfeatures=1
+ro.com.google.networklocation=1
+# set update intervall for battery polling in seconds
+status.battery.polling=1
+ro.sf.install_non_market_apps=1
+# fo huawei-generic 3g
+rild.libpath=/system/lib/libhuaweigeneric-ril.so
+rild.libargs=-d /dev/ttyUSB2 -v /dev/ttyUSB1
+keyguard.no_require_sim=1
+# end system.prop for acer-1000s

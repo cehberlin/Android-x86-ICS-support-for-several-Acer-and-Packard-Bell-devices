@@ -1,0 +1,10 @@
+diff --git a/tx2500.mk b/tx2500.mk
+index 2e7027b..1e5ce5c 100644
+--- a/tx2500.mk
++++ b/tx2500.mk
+@@ -13,4 +13,4 @@ PRODUCT_COPY_FILES += \
+ 	$(LOCAL_PATH)/vold.fstab:system/etc/vold.fstab \
+ 	$(LOCAL_PATH)/input/AT_Translated_Set_2_keyboard.kl:system/usr/keylayout/AT_Translated_Set_2_keyboard.kl \
+ 	$(LOCAL_PATH)/input/HP_WMI_hotkeys.kl:system/usr/keylayout/HP_WMI_hotkeys.kl \
+-	$(LOCAL_PATH)/input/SynPS_2_Synaptics_TouchPad.idc:system/usr/idc/SynPS_2_Synaptics_TouchPad.idc
++	device/common/generic_x86/GenericTouchPad.idc:system/usr/idc/SynPS_2_Synaptics_TouchPad.idc \

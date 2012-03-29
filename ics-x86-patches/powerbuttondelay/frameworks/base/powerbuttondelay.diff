@@ -1,0 +1,14 @@
+diff --git a/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java b/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
+index 0b223c1..5d4daef 100755
+--- a/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
++++ b/policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
+@@ -589,7 +589,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+     private void interceptPowerKeyDown(boolean handled) {
+         mPowerKeyHandled = handled;
+         if (!handled) {
+-            mHandler.postDelayed(mPowerLongPress, ViewConfiguration.getGlobalActionKeyTimeout());
++            mHandler.post(mPowerLongPress);
++            //mHandler.postDelayed(mPowerLongPress, ViewConfiguration.getGlobalActionKeyTimeout());
+         }
+     }
+ 

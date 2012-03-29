@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2012 Android-x86 Project
+ *
+ * Author: Christopher-Eyk Hrabia <c.hrabia@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+Device target for Android-x86. Especially for below listed devices
+ 
+Tested on:
+- Acer 1825PT
+- Acer 1825PTZ
+- Acer 1820PT
+- Acer 1810 (full speed after disk installation, because it is necessary to disable the sensors lib to avoid polling sensors library without sensor)
+- Acer 1425
+- Acer 1420
+- Acer 1410 (full speed after disk installation, because it is necessary to disable the sensors lib to avoid polling sensors library without sensor)
+Packard Bell Butterfly
+
+Supports:
+- Multitouch Touchscreen and Touchpad
+- Sound
+- Wifi
+- Bluetooth
+- SD-Cardreader
+- Webcam
+- Accelerometer --> auto-rotation (if available, if not sensors library will be disabled automatically after second boot in non-livemode (installed on any disk) -- reduces cpu load)
+- Selection of different hardware keyboard layouts --> German, English, French and Russian
+- Backlight
+- Automatic detection of tablet and laptop mode on convertible devices via TABLET_SW command --> Results in hiding automatically the onscreen keyboard
+
+
+Should also work well on other devices from Acer (or Packard Bell clones), let me know if you have to tested it!
+
+
+Virtualbox support with:
+- Working Ethernet
+- No HW-acceleration
+
+
+Check http://www.ceh-photo.de for further information and support!
+
+
+Development information:
+- You need to add Google Apps on your own, because of licence difficulties:
+    - Just copy all app files to app folder and all other files in corresponding structure below folder gapps-ics and enable commented  PRODUCT_COPY_FILES lines in aspire1000s.mk
+    - Only enable remove unnecessary apps patch if you integrate Google Apps
+- The default ICS-kernel 3.09 must be replaced with the android kernel from gingerbread 2.6.39 (because of problems with suspend and wifi). You need to include the hid-multitouch backport from 3.09, Ethernet patch and acer-hdf patch for better support of above Acer devices with. All these changes are integrated in kernel_2.6.39_patch
+- To apply all changes to a fresh Android-x86 ICS checkout you need to:
+    copy the checked out repo directory to /devices directory inside your ICS-x86 checkout 
+    replace the kernel directory with included one
+    copy every patch directory content of patches you want to apply to repo base directory (creates all new files) and a apply all patches/diffs to apply necessary changes to existing files

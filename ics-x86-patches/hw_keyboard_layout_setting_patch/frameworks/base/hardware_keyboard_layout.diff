@@ -1,0 +1,97 @@
+diff --git a/libs/ui/Input.cpp b/libs/ui/Input.cpp
+index 3de75ba..936c37c 100644
+--- a/libs/ui/Input.cpp
++++ b/libs/ui/Input.cpp
+@@ -26,6 +26,8 @@
+ 
+ #include <ui/Input.h>
+ 
++#include <cutils/properties.h>
++
+ #include <math.h>
+ #include <limits.h>
+ 
+@@ -55,22 +57,43 @@ static bool isValidNameChar(char ch) {
+     return isascii(ch) && (isdigit(ch) || isalpha(ch) || ch == '-' || ch == '_');
+ }
+ 
+-static void appendInputDeviceConfigurationFileRelativePath(String8& path,
+-        const String8& name, InputDeviceConfigurationFileType type) {
+-    path.append(CONFIGURATION_FILE_DIR[type]);
++static String8 convertInvalidNameChars(String8 name) {
++    String8 convertedName;
+     for (size_t i = 0; i < name.length(); i++) {
+         char ch = name[i];
+         if (!isValidNameChar(ch)) {
+             ch = '_';
+         }
+-        path.append(&ch, 1);
++        convertedName.append(&ch, 1);
+     }
++    return convertedName;
++}
++
++static void appendInputDeviceConfigurationFileRelativePath(String8& path,
++        const String8& name, InputDeviceConfigurationFileType type) {
++    path.append(CONFIGURATION_FILE_DIR[type]);
++    path.append(convertInvalidNameChars(name));
+     path.append(CONFIGURATION_FILE_EXTENSION[type]);
+ }
+ 
+ String8 getInputDeviceConfigurationFilePathByDeviceIdentifier(
+         const InputDeviceIdentifier& deviceIdentifier,
+         InputDeviceConfigurationFileType type) {
++        
++    //check device property first persist.sys.keylayout.NAMEOFDEVICE
++    char devKeylayoutPropertyKey[PROPERTY_KEY_MAX];
++    char devKeylayoutPropertyValue[PROPERTY_VALUE_MAX];
++    snprintf(devKeylayoutPropertyKey, sizeof(devKeylayoutPropertyKey),
++                     "persist.sys.keylayout.%s", 
++                     convertInvalidNameChars(deviceIdentifier.name).string());
++    if(property_get(devKeylayoutPropertyKey, devKeylayoutPropertyValue, NULL) > 0){
++        String8 productPath(getInputDeviceConfigurationFilePathByName(
++            String8(devKeylayoutPropertyValue),type));
++        if (!productPath.isEmpty()) {
++            return productPath;
++        }
++    }
++        
+     if (deviceIdentifier.vendor !=0 && deviceIdentifier.product != 0) {
+         if (deviceIdentifier.version != 0) {
+             // Try vendor product version.
+diff --git a/services/input/EventHub.cpp b/services/input/EventHub.cpp
+index 82a9cfb..02b5083 100644
+--- a/services/input/EventHub.cpp
++++ b/services/input/EventHub.cpp
+@@ -970,6 +970,31 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
+         device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
+     }
+ 
++    if (haveKeyboardKeys) {
++        int i = 0;
++        //Register keyboard name for locale layout selection
++        while(true){
++            char devKeyboardPropertyKey[PROPERTY_KEY_MAX];
++            char devKeyboardPropertyValue[PROPERTY_VALUE_MAX];
++            
++            snprintf(devKeyboardPropertyKey, sizeof(devKeyboardPropertyKey),
++                     "persist.sys.keyboard.%d.name", i++);
++            
++            if(property_get(devKeyboardPropertyKey, devKeyboardPropertyValue, NULL) > 0){
++                //check if keyboard is already listed --> should be listed after first time connected
++                if(strcmp(devKeyboardPropertyValue,device->identifier.name.string()) == 0){
++                    break;
++                }
++            }else{ //register new device
++                snprintf(devKeyboardPropertyValue, sizeof(devKeyboardPropertyValue),
++                         "%s", device->identifier.name.string());
++                LOGD("Register new keyboard. Property: %s Value: %s", devKeyboardPropertyKey ,devKeyboardPropertyValue);
++                property_set(devKeyboardPropertyKey,devKeyboardPropertyValue);
++                break; //break if a free position is found
++            }
++        }        
++    }
++
+     // See if this is a cursor device such as a trackball or mouse.
+     if (test_bit(BTN_MOUSE, device->keyBitmask)
+             && test_bit(REL_X, device->relBitmask)

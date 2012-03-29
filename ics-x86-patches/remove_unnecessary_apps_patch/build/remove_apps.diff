@@ -1,0 +1,33 @@
+diff --git a/target/product/generic_no_telephony.mk b/target/product/generic_no_telephony.mk
+index 0d87fc3..6f48bd6 100644
+--- a/target/product/generic_no_telephony.mk
++++ b/target/product/generic_no_telephony.mk
+@@ -24,15 +24,12 @@ PRODUCT_PACKAGES := \
+     AlarmProvider \
+     Bluetooth \
+     Calculator \
+-    Calendar \
+     CertInstaller \
+     DrmProvider \
+     Email \
+     Exchange \
+-    Gallery2 \
+     LatinIME \
+     Launcher2 \
+-    Music \
+     MusicFX \
+     Provision \
+     Phone \
+diff --git a/target/product/generic_x86.mk b/target/product/generic_x86.mk
+index 7428bbf..96f0c48 100644
+--- a/target/product/generic_x86.mk
++++ b/target/product/generic_x86.mk
+@@ -17,7 +17,7 @@
+ # This is a generic product that isn't specialized for a specific device.
+ # It includes the base Android-x86 platform.
+ 
+-$(call inherit-product, $(SRC_TARGET_DIR)/product/generic.mk)
++$(call inherit-product, $(SRC_TARGET_DIR)/product/generic_no_telephony.mk)
+ 
+ GENERIC_X86_DIR := device/common/generic_x86
+ 

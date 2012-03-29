@@ -1,0 +1,26 @@
+diff --git a/data/keyboards/common.mk b/data/keyboards/common.mk
+index 335298c..00614da 100644
+--- a/data/keyboards/common.mk
++++ b/data/keyboards/common.mk
+@@ -26,13 +26,19 @@ keylayouts := \
+     Vendor_046d_Product_c532.kl \
+     Vendor_054c_Product_0268.kl \
+     Vendor_05ac_Product_0239.kl \
+-    Vendor_22b8_Product_093d.kl
++    Vendor_22b8_Product_093d.kl \
++    de.kl \
++    fr.kl \
++    ru.kl
+ 
+ keycharmaps := \
+     Generic.kcm \
+     Virtual.kcm \
+     qwerty.kcm \
+-    qwerty2.kcm
++    qwerty2.kcm \
++    de.kcm \
++    fr.kcm \
++    ru.kcm
+ 
+ keyconfigs := \
+     qwerty.idc \

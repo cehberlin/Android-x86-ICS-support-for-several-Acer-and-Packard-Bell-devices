@@ -1,0 +1,13 @@
+diff --git a/core/java/android/os/SystemProperties.java b/core/java/android/os/SystemProperties.java
+index 619bf8d..7b09623 100644
+--- a/core/java/android/os/SystemProperties.java
++++ b/core/java/android/os/SystemProperties.java
+@@ -25,7 +25,7 @@ package android.os;
+  */
+ public class SystemProperties
+ {
+-    public static final int PROP_NAME_MAX = 31;
++    public static final int PROP_NAME_MAX = 127;
+     public static final int PROP_VALUE_MAX = 91;
+ 
+     private static native String native_get(String key);

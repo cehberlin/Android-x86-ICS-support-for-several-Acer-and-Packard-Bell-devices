@@ -1,0 +1,21 @@
+diff --git a/res/values/arrays.xml b/res/values/arrays.xml
+index 1e60917..8e8a3e7 100644
+--- a/res/values/arrays.xml
++++ b/res/values/arrays.xml
+@@ -56,6 +56,7 @@
+         <item>2 minutes</item>
+         <item>5 minutes</item>
+         <item>10 minutes</item>
++		<item>30 minutes</item>
+         <item>Never time out</item>
+     </string-array>
+ 
+@@ -73,6 +74,8 @@
+         <item>300000</item>
+         <!-- Do not translate. -->
+         <item>600000</item>
++		<!-- Do not translate. -->
++        <item>1800000</item>
+         <!-- Do not translate. -->
+         <item>604800000</item>
+     </string-array>

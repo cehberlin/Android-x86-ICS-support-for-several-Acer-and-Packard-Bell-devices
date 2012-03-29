@@ -1,0 +1,44 @@
+diff --git a/services/java/com/android/server/BatteryService.java b/services/java/com/android/server/BatteryService.java
+index 76a4cb0..f2d38b7 100644
+--- a/services/java/com/android/server/BatteryService.java
++++ b/services/java/com/android/server/BatteryService.java
+@@ -33,8 +33,10 @@ import android.os.RemoteException;
+ import android.os.ServiceManager;
+ import android.os.SystemClock;
+ import android.os.UEventObserver;
++import android.os.SystemProperties;
+ import android.provider.Settings;
+ import android.util.EventLog;
++import android.util.Log;
+ import android.util.Slog;
+ 
+ import java.io.File;
+@@ -144,8 +146,26 @@ class BatteryService extends Binder {
+             mInvalidChargerObserver.startObserving("DEVPATH=/devices/virtual/switch/invalid_charger");
+         }
+ 
+-        // set initial status
+-        update();
++        // start polling
++        final int pollFreq = (SystemProperties.getInt("status.battery.polling", 0) * 1000);
++        Log.d(TAG,"BatteryServiceUpdateThread polling every ms: " + pollFreq );
++        new Thread(new Runnable() {
++            @Override
++            public void run() {
++                while (true) {
++                    update();
++                    if (pollFreq > 0) {
++                        try {
++                            Thread.sleep(pollFreq);
++                        } catch (InterruptedException e) {
++                        }
++                    } else {
++                        Log.d(TAG,"No BatteryServiceUpdateThread");
++                        break;
++                    }
++                }
++            }
++        }, "BatteryServiceUpdateThread").start();
+     }
+ 
+     final boolean isPowered() {
