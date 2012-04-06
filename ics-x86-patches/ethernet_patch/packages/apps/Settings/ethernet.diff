@@ -92,3 +92,30 @@ index 9a29122..99eb756 100644
      <!-- Wi-Fi Settings --> <skip />
      <!-- Used in the 1st-level settings screen to turn on Wi-Fi -->
      <string name="wifi_quick_toggle_title">Wi-Fi</string>
+diff --git a/src/com/android/settings/Settings.java b/src/com/android/settings/Settings.java
+index c9f5c73..1533a11 100644
+--- a/src/com/android/settings/Settings.java
++++ b/src/com/android/settings/Settings.java
+@@ -27,6 +27,8 @@ import android.content.Intent;
+ import android.content.pm.ActivityInfo;
+ import android.content.pm.PackageManager;
+ import android.content.pm.PackageManager.NameNotFoundException;
++import android.net.ConnectivityManager;
++import android.net.ethernet.EthernetManager;
+ import android.os.Bundle;
+ import android.preference.Preference;
+ import android.preference.PreferenceActivity;
+@@ -335,6 +337,13 @@ public class Settings extends PreferenceActivity implements ButtonBarHandler {
+                 if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
+                     target.remove(header);
+                 }
++            }else if (id == R.id.ethernet_settings) {
++                // Remove Ethernet Settings if Ethernet service is not available.
++                EthernetManager ethManager = (EthernetManager)getBaseContext().getSystemService(
++                        Context.ETHERNET_SERVICE);
++                if (ethManager.getTotalInterface()<1) {
++                    target.remove(header);
++                }
+             }
+ 
+             // Increment if the current one wasn't removed by the Utils code.

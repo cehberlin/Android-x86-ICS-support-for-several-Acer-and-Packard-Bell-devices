@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux/x86 2.6.39.4 Kernel Configuration
-# Sat Mar 24 10:06:24 2012
+# Thu Mar 29 10:18:16 2012
 #
 # CONFIG_64BIT is not set
 CONFIG_X86_32=y
@@ -1228,7 +1228,7 @@ CONFIG_USB_HSO=m
 #
 # CONFIG_FDDI is not set
 # CONFIG_HIPPI is not set
-CONFIG_PPP=m
+CONFIG_PPP=y
 CONFIG_PPP_MULTILINK=y
 CONFIG_PPP_FILTER=y
 CONFIG_PPP_ASYNC=m
@@ -1240,7 +1240,7 @@ CONFIG_PPPOE=m
 CONFIG_PPPOLAC=m
 CONFIG_PPPOPNS=m
 # CONFIG_SLIP is not set
-CONFIG_SLHC=m
+CONFIG_SLHC=y
 # CONFIG_NET_FC is not set
 CONFIG_NETCONSOLE=m
 CONFIG_NETCONSOLE_DYNAMIC=y

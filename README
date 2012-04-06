@@ -3,6 +3,24 @@
  *
  * Author: Christopher-Eyk Hrabia <c.hrabia@gmail.com>
  *
+ * Contributions and history:
+ *
+ * - Based on first target of Acer1825 for Android-x86 Froyo from Arobase
+ *      - Including tomfrancart's first changes in acerhdf
+ * - Based on all work which was done for enabling Ubuntu support for Acer 1825
+ *      - http://ubuntuforums.org/showthread.php?t=1486671 
+ *      - Including Perpe for getting out how tablet-mode detection is working and providing the keycodes
+ * - Based on first implementation of sensors library for LIS3LV20D by Alexey Roslyakov
+ * - Based on my former created targets for gingerbread-x86 (never released) and honeycomb-x86
+ * - Based on Rene Braken's WeTab target https://github.com/rbraken/wetab-ICS-device-tree
+ * - Based on other targets of Android-x86 ICS: Asus_laptop, HP tx2500, Lenovo s103t, Tegatech tegav2
+ * - Based on Ethernet-patches from Ron M and various other contributors
+ *      - https://groups.google.com/group/android-x86/browse_thread/thread/30fa23d81cddfab1/9adda7711177d788?lnk=gst&q=ethernet+patch#9adda7711177d788
+ * - Based on another ethernet patch from Mathieu J. Poirier
+ *      - http://e2e.ti.com/cfs-filesystemfile.ashx/__key/CommunityServer-Discussions-Components-Files/509/1425.0002_2D00_Adding_2D00_ethernet_2D00_status_2D00_icon.patch.txt
+ *
+ * If I forget a contributor, let me know!
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,32 +33,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 Device target for Android-x86. Especially for below listed devices
  
 Tested on:
 - Acer 1825PT
 - Acer 1825PTZ
 - Acer 1820PT
-- Acer 1810 (full speed after disk installation, because it is necessary to disable the sensors lib to avoid polling sensors library without sensor)
+- Acer 1810 *
 - Acer 1425
 - Acer 1420
-- Acer 1410 (full speed after disk installation, because it is necessary to disable the sensors lib to avoid polling sensors library without sensor)
-Packard Bell Butterfly
+- Acer 1410 *
+- Packard Bell Butterfly
+
+* (full speed after disk installation, because it is necessary to disable the sensors lib to avoid 
+    polling sensors library without sensor)
+
+
+Credits to all users who are helping to test!
 
 Supports:
 - Multitouch Touchscreen and Touchpad
-- Sound
+- Sound and at least external microphone
 - Wifi
 - Bluetooth
 - SD-Cardreader
 - Webcam
-- Accelerometer --> auto-rotation (if available, if not sensors library will be disabled automatically after second boot in non-livemode (installed on any disk) -- reduces cpu load)
+- Accelerometer --> auto-rotation 
+    (if available, if not sensors library will be disabled automatically after second boot in non-livemode 
+        (installed on any disk) --> reduces cpu load)
 - Selection of different hardware keyboard layouts --> German, English, French and Russian
 - Backlight
-- Automatic detection of tablet and laptop mode on convertible devices via TABLET_SW command --> Results in hiding automatically the onscreen keyboard
+- Automatic detection of tablet and laptop mode on convertible devices via TABLET_SW command 
+    --> Results in hiding automatically the onscreen keyboard
 
 
-Should also work well on other devices from Acer (or Packard Bell clones), let me know if you have to tested it!
+Should also work well on other devices from Acer (or Packard Bell clones), let me know if you have tested it!
+    - Also Intel Atom based devices
 
 
 Virtualbox support with:
@@ -53,10 +82,16 @@ Check http://www.ceh-photo.de for further information and support!
 
 Development information:
 - You need to add Google Apps on your own, because of licence difficulties:
-    - Just copy all app files to app folder and all other files in corresponding structure below folder gapps-ics and enable commented  PRODUCT_COPY_FILES lines in aspire1000s.mk
-    - Only enable remove unnecessary apps patch if you integrate Google Apps
-- The default ICS-kernel 3.09 must be replaced with the android kernel from gingerbread 2.6.39 (because of problems with suspend and wifi). You need to include the hid-multitouch backport from 3.09, Ethernet patch and acer-hdf patch for better support of above Acer devices with. All these changes are integrated in kernel_2.6.39_patch
-- To apply all changes to a fresh Android-x86 ICS checkout you need to:
-    copy the checked out repo directory to /devices directory inside your ICS-x86 checkout 
-    replace the kernel directory with the checked out directory from gingerbread-x86 and apply above mentioned kernel patch
-    copy every patch directory content of patches you want to apply to repo base directory (creates all new files) and a apply all patches/diffs to apply necessary changes to existing files
+    - Just copy all files from your gapps package in corresponding structure below 
+        folder gapps-ics and enable commented  PRODUCT_COPY_FILES lines in aspire1000s.mk
+    - Only enable "remove unnecessary apps patch" if you integrate Google Apps
+- The default ICS-kernel 3.09 must be replaced with the android kernel from 
+    gingerbread 2.6.39 (because of problems with suspend and wifi). You need to include the 
+    hid-multitouch backport from 3.09, Ethernet patch and acer-hdf patch for better support of 
+    above Acer devices with. All these changes are integrated in kernel_2.6.39_patch
+- To apply all changes to a fresh Android-x86 ICS checkout, you need to:
+    - copy the checked out repo directory to /devices directory inside your ICS-x86 checkout 
+    - replace the kernel directory with the checked out directory from gingerbread-x86 and 
+    - apply above mentioned kernel patch
+    - copy every patch directory content of patches you want to apply to repo base directory 
+      (creates all new files) and apply patches/diffs for changing existing files
