@@ -1,0 +1,7 @@
+This patch adds a feature of an automatic detection of available hardware keyboards and selection of their layouts.
+
+If hardware keyboards are available a new setting for the hardware keyboard layout selection will be shown in settings app.
+
+This patch comes with additional hardware keyboard layouts for German, French and Russian keyboards.
+
+The layouts in /device/common/keymaps should be removed because they are not working with ICS and left over from gingerbread/froyo releases.
