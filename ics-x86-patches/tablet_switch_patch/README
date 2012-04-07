@@ -1,0 +1,6 @@
+Adds support for detecting SW_TABLET switch events in Android Framework.
+Moreover the configuration possebilities for SW_LID and combination of SW_TABLET and SW_LID are extended. So it is possible to deactivate SW_LID features while enabling SW_TABLET and vice versa.
+
+See aspire1000s/libsensors and its configuration for an example of how to create and use SW_TABLET events.
+
+With this patch Android could detect if a convertible laptop is in laptop or tablet-mode, this results in hiding/showing onscreen keyboard automatically. Locking rotation is not working but it is also not working without changes and the use of respective original settings for SW_LID....

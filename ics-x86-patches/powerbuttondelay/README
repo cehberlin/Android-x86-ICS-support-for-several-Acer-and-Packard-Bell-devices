@@ -1,0 +1,4 @@
+Let Android immediately start shutdown dialog without waiting for long press. Works well in combination with 
+
+PRODUCT_PROPERTY_OVERRIDES := \
+    poweroff.doubleclick=1

@@ -1,0 +1,2 @@
+This patch adds ethernet support with UI toolbar support.
+Includes deactivation in settings app if no device is available

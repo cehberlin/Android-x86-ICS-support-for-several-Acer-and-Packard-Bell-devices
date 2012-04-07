@@ -1,0 +1,6 @@
+This patch adds an additional update thread for battery status.
+Could be configured with system property:
+status.battery.polling=1
+
+0 Disables thread.
+Number greater than 0 defines update cycle in seconds

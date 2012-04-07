@@ -1,0 +1,1 @@
+Adds pcie_aspm=force option to kernel command line for reduced power consumption

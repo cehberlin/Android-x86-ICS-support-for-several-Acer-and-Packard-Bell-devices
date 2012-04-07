@@ -1,0 +1,3 @@
+Backports hid-multitouch from kernel 3.09.
+Changes something regarding Ethernet support.
+Add new devices to acer-hdf module.
