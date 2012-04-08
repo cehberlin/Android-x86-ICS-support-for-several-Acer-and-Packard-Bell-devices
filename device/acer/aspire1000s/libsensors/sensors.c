@@ -459,24 +459,16 @@ while ((pollres = poll(&pfd, 1, 0))) {
     Read property "persist.sys.sensors.enabled" which indicates if the sensors library should be enabled or not
     Valid values are "no" and "yes"
 */
-static bool is_sensors_enabled()
+static bool is_sensors_available()
 {
-
-        char sensorEnabledPropertyKey[PROPERTY_KEY_MAX];
-        char sensorEnabledPropertyValue[PROPERTY_VALUE_MAX];
-        
-        snprintf(sensorEnabledPropertyKey, sizeof(sensorEnabledPropertyKey),
-                     "%s", "persist.sys.sensors.enabled");
-
-        if(property_get(sensorEnabledPropertyKey, sensorEnabledPropertyValue, NULL) > 0){        
-            if(strcmp("no",sensorEnabledPropertyValue) == 0){
-                return false;
-            }else{
-                return true;
-            }
-        }else{
-            return true;
-        }
+    struct stat sts;
+    if (stat(SYSFS_PATH "position", &sts) == -1 && errno == ENOENT)
+    {
+        LOGD("Can not find "SYSFS_PATH "position. The reason is may a missing module or device.");
+        return false;
+    }else{
+        return true;
+    }
 }
 
 /******************************************************************************/
@@ -494,7 +486,7 @@ static int open_sensors(const struct hw_module_t* module, char const* name,
 
     if (!strcmp(name, SENSORS_HARDWARE_POLL)) {
     
-        if(is_sensors_enabled() == true){
+        if(is_sensors_available() == true){
             LOGD("sensors enabled");
        
             struct sensors_poll_device_t *dev =

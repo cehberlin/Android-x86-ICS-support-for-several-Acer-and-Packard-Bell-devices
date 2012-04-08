@@ -40,17 +40,14 @@ Tested on:
 - Acer 1825PT
 - Acer 1825PTZ
 - Acer 1820PT
-- Acer 1810 *
+- Acer 1810
 - Acer 1425
 - Acer 1420
-- Acer 1410 *
+- Acer 1410
 - Packard Bell Butterfly
 
-* (full speed after disk installation, because it is necessary to disable the sensors lib to avoid 
-    polling sensors library without sensor)
 
-
-Credits to all users who are helping to test!
+Credits to all users who help testing!
 
 Supports:
 - Multitouch Touchscreen and Touchpad
